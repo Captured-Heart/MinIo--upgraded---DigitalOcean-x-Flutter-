@@ -1,0 +1,25 @@
+name: minio_flutter
+description: Unofficial MinIO Dart Client SDK that provides simple APIs to
+  access any Amazon S3 compatible object storage server.
+version: 0.0.1
+homepage: https://www.kjxbyz.com/flutterfleet
+repository: https://github.com/FlutterFleet/FlutterFleet/tree/main/packages/minio_flutter
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  buffer: ^1.2.3
+  convert: ^3.1.1
+  crypto: ^3.0.3
+  http: ^1.0.0
+  intl: ^0.19.0
+  meta: ^1.10.0
+  mime: ^1.0.5
+  path: ^1.8.3
+  xml: ^6.5.0
+
+dev_dependencies:
+  html: ^0.15.4
+  lint: ^2.3.0
+  test: ^1.25.2
