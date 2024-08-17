@@ -16,10 +16,8 @@ import 'package:xml/xml.dart' show XmlElement;
 
 class Minio {
   factory Minio() {
-    return _instance!;
+    return _instance ?? Minio();
   }
-
-  static Minio shared = Minio();
 
   Minio._({
     required this.endPoint,
@@ -31,8 +29,10 @@ class Minio {
     this.region,
     this.enableTrace = false,
   }) {
+    
     _client = MinioClient(this);
   }
+  static Minio shared = Minio();
 
   static Minio init({
     required String endPoint,
@@ -70,7 +70,7 @@ class Minio {
     return _instance!;
   }
 
-  static Minio? _instance;
+  static late Minio _instance;
 
   /// default part size for multipart uploads.
   final partSize = 64 * 1024 * 1024;
@@ -212,15 +212,13 @@ class Minio {
         headers['x-amz-copy-source-if-modified-since'] = conditions.modified!;
       }
       if (conditions.unmodified != null) {
-        headers['x-amz-copy-source-if-unmodified-since'] =
-            conditions.unmodified!;
+        headers['x-amz-copy-source-if-unmodified-since'] = conditions.unmodified!;
       }
       if (conditions.matchETag != null) {
         headers['x-amz-copy-source-if-match'] = conditions.matchETag!;
       }
       if (conditions.matchETagExcept != null) {
-        headers['x-amz-copy-source-if-none-match'] =
-            conditions.matchETagExcept!;
+        headers['x-amz-copy-source-if-none-match'] = conditions.matchETagExcept!;
       }
     }
 
@@ -259,8 +257,7 @@ class Minio {
       );
       for (final upload in result.uploads) {
         if (upload.key != object) continue;
-        if (latestUpload == null ||
-            upload.initiated!.isAfter(latestUpload.initiated!)) {
+        if (latestUpload == null || upload.initiated!.isAfter(latestUpload.initiated!)) {
           latestUpload = upload;
         }
       }
@@ -511,11 +508,8 @@ class Minio {
       region: region ?? 'us-east-1',
     );
     validate(resp);
-    final bucketsNode =
-        xml.XmlDocument.parse(resp.body).findAllElements('Buckets').first;
-    return bucketsNode.children
-        .map((n) => Bucket.fromXml(n as XmlElement))
-        .toList();
+    final bucketsNode = xml.XmlDocument.parse(resp.body).findAllElements('Buckets').first;
+    return bucketsNode.children.map((n) => Bucket.fromXml(n as XmlElement)).toList();
   }
 
   /// Returns all [Object]s in a bucket.
@@ -605,9 +599,7 @@ class Minio {
     final isTruncated = getNodeProp(node.rootElement, 'IsTruncated')!.innerText;
     final nextMarker = getNodeProp(node.rootElement, 'NextMarker')?.innerText;
     final objs = node.findAllElements('Contents').map((c) => Object.fromXml(c));
-    final prefixes = node
-        .findAllElements('CommonPrefixes')
-        .map((c) => CommonPrefix.fromXml(c));
+    final prefixes = node.findAllElements('CommonPrefixes').map((c) => CommonPrefix.fromXml(c));
 
     return ListObjectsOutput()
       ..contents = objs.toList()
@@ -713,12 +705,9 @@ class Minio {
 
     final node = xml.XmlDocument.parse(resp.body);
     final isTruncated = getNodeProp(node.rootElement, 'IsTruncated')!.innerText;
-    final nextContinuationToken =
-        getNodeProp(node.rootElement, 'NextContinuationToken')?.innerText;
+    final nextContinuationToken = getNodeProp(node.rootElement, 'NextContinuationToken')?.innerText;
     final objs = node.findAllElements('Contents').map((c) => Object.fromXml(c));
-    final prefixes = node
-        .findAllElements('CommonPrefixes')
-        .map((c) => CommonPrefix.fromXml(c));
+    final prefixes = node.findAllElements('CommonPrefixes').map((c) => CommonPrefix.fromXml(c));
 
     return ListObjectsV2Output()
       ..contents = objs.toList()
@@ -782,9 +771,8 @@ class Minio {
     }
 
     region ??= this.region ?? 'us-east-1';
-    final payload = region == 'us-east-1'
-        ? ''
-        : CreateBucketConfiguration(region).toXml().toString();
+    final payload =
+        region == 'us-east-1' ? '' : CreateBucketConfiguration(region).toXml().toString();
 
     final resp = await _client.request(
       method: 'PUT',
@@ -849,26 +837,22 @@ class Minio {
     postPolicy.policy['conditions'].add(['eq', r'$x-amz-date', dateStr]);
     postPolicy.formData['x-amz-date'] = dateStr;
 
-    postPolicy.policy['conditions']
-        .add(['eq', r'$x-amz-algorithm', 'AWS4-HMAC-SHA256']);
+    postPolicy.policy['conditions'].add(['eq', r'$x-amz-algorithm', 'AWS4-HMAC-SHA256']);
     postPolicy.formData['x-amz-algorithm'] = 'AWS4-HMAC-SHA256';
 
     postPolicy.policy['conditions'].add(
       ['eq', r'$x-amz-credential', '$accessKey/${getScope(region, date)}'],
     );
-    postPolicy.formData['x-amz-credential'] =
-        '$accessKey/${getScope(region, date)}';
+    postPolicy.formData['x-amz-credential'] = '$accessKey/${getScope(region, date)}';
 
     if (sessionToken != null) {
-      postPolicy.policy['conditions']
-          .add(['eq', r'$x-amz-security-token', sessionToken]);
+      postPolicy.policy['conditions'].add(['eq', r'$x-amz-security-token', sessionToken]);
     }
 
     final policyBase64 = jsonBase64(postPolicy.policy);
     postPolicy.formData['policy'] = policyBase64;
 
-    final signature =
-        postPresignSignatureV4(region, date, secretKey, policyBase64);
+    final signature = postPresignSignatureV4(region, date, secretKey, policyBase64);
 
     postPolicy.formData['x-amz-signature'] = signature;
     final url = _client
@@ -1128,9 +1112,7 @@ class Minio {
     validate(resp, expect: 200);
 
     return AccessControlPolicy.fromXml(
-      xml.XmlDocument.parse(resp.body)
-          .findElements('AccessControlPolicy')
-          .first,
+      xml.XmlDocument.parse(resp.body).findElements('AccessControlPolicy').first,
     );
   }
 

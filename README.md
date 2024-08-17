@@ -1,6 +1,13 @@
 # minio_flutter
 
-Unofficial MinIO Dart Client SDK that provides simple APIs to access any Amazon S3 compatible object storage server.
+Unofficial MinIO Dart Client SDK that provides simple APIs to access any Amazon S3 compatible object storage server( Digital spaces, Filebase, AWS S3 etc) .
+
+      Upgraded to:
+      dart: ">=3.4.0 <4.0.0"
+      flutter: ">=3.22.0"
+      Now compatible with intl: ^1.19.0
+
+## If you have any issues with integrating it for digital spaces on DigitalOcean, reach out to me knkpozi@gmail.com
 
 ## Initialize
 
@@ -38,6 +45,7 @@ Minio.init(
 ```
 
 **File upload**
+
 ```dart
 import 'package:minio_flutter/io.dart';
 import 'package:minio_flutter/minio.dart';
@@ -58,6 +66,7 @@ For complete example, see: [example]
 > To use `fPutObject()` and `fGetObject`, you have to `import 'package:minio/io.dart';`
 
 **Upload with progress**
+
 ```dart
 import 'package:minio_flutter/minio.dart';
 
@@ -69,8 +78,8 @@ void main() async {
   );
 
   await Minio.shared.putObject(
-    'mybucket', 
-    'myobject', 
+    'mybucket',
+    'myobject',
     Stream<Uint8List>.value(Uint8List(1024)),
     onProgress: (bytes) => print('$bytes uploaded'),
   );
